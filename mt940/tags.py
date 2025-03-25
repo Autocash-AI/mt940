@@ -98,9 +98,10 @@ class Tag:
 
     def __init__(self) -> None:
         self.re = re.compile(self.pattern, self.RE_FLAGS)
+        self.raw_data = ''
 
     def parse(
-        self, transactions: models.Transactions, value: str
+        self, transactions: models.Transactions, value: str, raw_data: str, start_char: tuple(int, int), end_char: tuple(int, int)
     ) -> dict[str, str | None]:
         """
         Parses the given value using the Tag's pattern.
@@ -111,6 +112,9 @@ class Tag:
         :raises RuntimeError: If parsing fails.
         """
         match = self.re.match(value)
+        self.raw_data = raw_data
+        self.start_char = start_char
+        self.end_char = end_char
         if match:  # pragma: no branch
             self.logger.debug(
                 'matched (%d) %r against "%s", got: %s',
@@ -356,6 +360,9 @@ class BalanceBase(Tag):
         data = super().__call__(transactions, value)
         data['amount'] = models.Amount(**data)
         data['date'] = models.Date(**data)
+        data['raw_data'] = self.raw_data
+        data['start_char'] = self.start_char
+        data['end_char'] = self.end_char
         return {self.slug: models.Balance(**data)}
 
 

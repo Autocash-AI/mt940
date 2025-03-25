@@ -85,5 +85,4 @@ def parse(
     assert isinstance(data, str)
     transactions = mt940.models.Transactions(processors, tags)
     transactions.parse(data)
-
     return transactions

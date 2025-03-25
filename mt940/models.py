@@ -246,6 +246,9 @@ class Balance(Model):
         status: str | None = None,
         amount: Amount | str | None = None,
         date: Date | None = None,
+        raw_data: str | None = None,
+        start_char: tuple(int, int) | None = None,
+        end_char: tuple(int, int) | None = None,
         **kwargs: Any,
     ) -> None:
         if amount and not isinstance(amount, Amount):
@@ -255,19 +258,23 @@ class Balance(Model):
         self.status = status
         self.amount = amount
         self.date = date
+        self.raw_data = raw_data
+        self.start_char = start_char
+        self.end_char = end_char
 
     def __eq__(self, other: Any) -> bool:
         return (
             isinstance(other, Balance)
             and self.amount == other.amount
             and self.status == other.status
+            and self.raw_data == other.raw_data
         )
 
     def __repr__(self) -> str:
         return f'<{self}>'
 
     def __str__(self) -> str:
-        return f'{self.amount} @ {self.date}'
+        return f'{self.amount} @ {self.date} | {self.raw_data}'
 
 
 class Transaction(Model):
@@ -437,6 +444,7 @@ class Transactions(Sequence[Transaction]):
 
         # identify valid matches
         valid_matches = self.sanitize_tag_id_matches(matches)
+            
 
         for i, match in enumerate(valid_matches):
             self._process_match(match, i, valid_matches, data)
@@ -458,13 +466,17 @@ class Transactions(Sequence[Transaction]):
         # Nice trick to get all the text that is part of this tag, python
         # regex matches have a `end()` and `start()` to indicate the start
         # and end index of the match.
-
+        
         if valid_matches[i + 1 : i + 2]:
             tag_data = data[match.end() : valid_matches[i + 1].start()].strip()
+            raw_data = data[match.start() : valid_matches[i + 1].start()].strip()
         else:
             tag_data = data[match.end() :].strip()
-
-        tag_dict: dict[str, Any] = tag.parse(self, tag_data)
+            raw_data = data[match.start() :]
+        start_char = (i, match.start())
+        end_char = (i, match.end())
+    
+        tag_dict: dict[str, Any] = tag.parse(self, tag_data, raw_data, start_char, end_char)
 
         # Preprocess data before creating the object
 
@@ -472,12 +484,14 @@ class Transactions(Sequence[Transaction]):
             tag_dict = processor(self, tag, tag_dict)
 
         result: Any = tag(self, tag_dict)
-
+        # result = 
         # Postprocess the object
 
         for processor in self.processors.get(f'post_{tag.slug}', []):
             result = processor(self, tag, tag_dict, result)
-
+        result['raw_data'] = raw_data
+        result['start_char'] = start_char
+        result['end_char'] = end_char
         if isinstance(tag, mt940.tags.Statement):
             self._process_statement_tag(result)
         elif issubclass(tag.scope, Transaction) and self.transactions:
