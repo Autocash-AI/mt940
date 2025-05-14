@@ -6,7 +6,7 @@ import re
 import typing
 import warnings
 from collections.abc import Mapping, MutableMapping, Sequence
-from typing import Any, Callable, ClassVar, overload
+from typing import Any, Callable, ClassVar, overload, Tuple
 
 import mt940
 
@@ -246,6 +246,9 @@ class Balance(Model):
         status: str | None = None,
         amount: Amount | str | None = None,
         date: Date | None = None,
+        raw_data: str | None = None,
+        start_char: Tuple(int, int) | None = None,
+        end_char: Tuple(int, int) | None = None,
         **kwargs: Any,
     ) -> None:
         if amount and not isinstance(amount, Amount):
@@ -255,19 +258,23 @@ class Balance(Model):
         self.status = status
         self.amount = amount
         self.date = date
+        self.raw_data = raw_data
+        self.start_char = start_char
+        self.end_char = end_char
 
     def __eq__(self, other: Any) -> bool:
         return (
             isinstance(other, Balance)
             and self.amount == other.amount
             and self.status == other.status
+            and self.raw_data == other.raw_data
         )
 
     def __repr__(self) -> str:
         return f'<{self}>'
 
     def __str__(self) -> str:
-        return f'{self.amount} @ {self.date}'
+        return f'{self.amount} @ {self.date} | {self.raw_data}'
 
 
 class Transaction(Model):
