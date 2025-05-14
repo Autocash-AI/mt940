@@ -246,9 +246,6 @@ class Balance(Model):
         status: str | None = None,
         amount: Amount | str | None = None,
         date: Date | None = None,
-        raw_data: str | None = None,
-        start_char: tuple(int, int) | None = None,
-        end_char: tuple(int, int) | None = None,
         **kwargs: Any,
     ) -> None:
         if amount and not isinstance(amount, Amount):
@@ -258,23 +255,19 @@ class Balance(Model):
         self.status = status
         self.amount = amount
         self.date = date
-        self.raw_data = raw_data
-        self.start_char = start_char
-        self.end_char = end_char
 
     def __eq__(self, other: Any) -> bool:
         return (
             isinstance(other, Balance)
             and self.amount == other.amount
             and self.status == other.status
-            and self.raw_data == other.raw_data
         )
 
     def __repr__(self) -> str:
         return f'<{self}>'
 
     def __str__(self) -> str:
-        return f'{self.amount} @ {self.date} | {self.raw_data}'
+        return f'{self.amount} @ {self.date}'
 
 
 class Transaction(Model):
@@ -476,7 +469,7 @@ class Transactions(Sequence[Transaction]):
         start_char = (i, match.start())
         end_char = (i, match.end())
     
-        tag_dict: dict[str, Any] = tag.parse(self, tag_data, raw_data, start_char, end_char)
+        tag_dict: dict[str, Any] = tag.parse(self, tag_data)
 
         # Preprocess data before creating the object
 

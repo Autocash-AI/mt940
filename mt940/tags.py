@@ -101,7 +101,7 @@ class Tag:
         self.raw_data = ''
 
     def parse(
-        self, transactions: models.Transactions, value: str, raw_data: str, start_char: tuple(int, int), end_char: tuple(int, int)
+        self, transactions: models.Transactions, value: str
     ) -> dict[str, str | None]:
         """
         Parses the given value using the Tag's pattern.
@@ -112,9 +112,6 @@ class Tag:
         :raises RuntimeError: If parsing fails.
         """
         match = self.re.match(value)
-        self.raw_data = raw_data
-        self.start_char = start_char
-        self.end_char = end_char
         if match:  # pragma: no branch
             self.logger.debug(
                 'matched (%d) %r against "%s", got: %s',
@@ -249,7 +246,7 @@ class StatementNumber(Tag):
 
     id = 28
     pattern = r"""
-    (?P<statement_number>\d{1,5})  # 5n
+    (?P<statement_number>\d{1,5})?  # 5n
     (?:/?(?P<sequence_number>\d{1,5}))?  # [/5n]
     $"""
 
@@ -360,9 +357,6 @@ class BalanceBase(Tag):
         data = super().__call__(transactions, value)
         data['amount'] = models.Amount(**data)
         data['date'] = models.Date(**data)
-        data['raw_data'] = self.raw_data
-        data['start_char'] = self.start_char
-        data['end_char'] = self.end_char
         return {self.slug: models.Balance(**data)}
 
 
@@ -424,7 +418,7 @@ class Statement(Tag):
                             # code, if needed)
     [\n ]?
     (?P<amount>[\d,]{1,15})  # 15d Amount
-    (?P<id>[A-Z][A-Z0-9 ]{3})?
+    (?P<id>.?[A-Z][A-Z0-9 ]{2})
     (?P<customer_reference>((?!//)[^\n]){0,16})
     (//(?P<bank_reference>.{0,23}))?
     (\n?(?P<extra_details>.{0,34}))?
