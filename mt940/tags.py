@@ -249,7 +249,7 @@ class StatementNumber(Tag):
 
     id = 28
     pattern = r"""
-    (?P<statement_number>\d{1,5})  # 5n
+    (?P<statement_number>\d{1,5})?  # 5n
     (?:/?(?P<sequence_number>\d{1,5}))?  # [/5n]
     $"""
 
@@ -424,7 +424,7 @@ class Statement(Tag):
                             # code, if needed)
     [\n ]?
     (?P<amount>[\d,]{1,15})  # 15d Amount
-    (?P<id>[A-Z][A-Z0-9 ]{3})?
+    (?P<id>.?[A-Z][A-Z0-9 ]{2})?
     (?P<customer_reference>((?!//)[^\n]){0,16})
     (//(?P<bank_reference>.{0,23}))?
     (\n?(?P<extra_details>.{0,34}))?
