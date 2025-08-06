@@ -428,7 +428,7 @@ class Statement(Tag):
     (?P<id>.?[A-Z][A-Z0-9 ]{2})?
     (?P<customer_reference>((?!//)[^\n]){0,16})
     (//(?P<bank_reference>.{0,23}))?
-    (\n?(?P<extra_details>.{0,34}))?
+    (\n?(?P<extra_details>[\s\S]{0,34}))?
     $"""
 
     def __call__(
