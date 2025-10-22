@@ -425,7 +425,7 @@ class Statement(Tag):
                             # code, if needed)
     [\n ]?
     (?P<amount>[\d,]{1,15})  # 15d Amount
-    (?P<id>.?[A-Z][A-Z0-9 ]{2})?
+    (?P<id>.?[A-Z0-9][A-Z0-9 ]{2})?
     (?P<customer_reference>((?!//)[^\n]){0,16})
     (//(?P<bank_reference>.{0,23}))?
     (\n?(?P<extra_details>[\s\S]{0,34}))?
