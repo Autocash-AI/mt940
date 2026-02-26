@@ -245,11 +245,14 @@ class StatementNumber(Tag):
     """Statement number / sequence number
 
     Pattern: 5n[/5n][/5n]
+
+    Some banks emit non-standard alphanumeric statement numbers in the first
+    component (for example ``92GBP/1``), so this parser accepts letters too.
     """
 
     id = 28
     pattern = r"""
-    (?P<statement_number>\d{1,5})?  # 5n
+    (?P<statement_number>[A-Za-z0-9]{1,12})?  # 5n (or non-standard alnum)
     (?:/?(?P<sequence_number>\d{1,5}))?  # [/5n]
     (?:/?(?P<extra_number>\d{1,5}))?  # [/5n]
     $"""
